@@ -3,6 +3,8 @@ import { APIGatewayProxyEvent, APIGatewayProxyHandler, APIGatewayProxyResult } f
 import { parseUserId } from '../../auth/utils'
 import * as AWS  from 'aws-sdk'
 
+import { createTodo } from '../../businessLogic/todos'
+
 const docClient = new AWS.DynamoDB.DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 const indexName = process.env.INDEX_NAME
@@ -16,6 +18,8 @@ const authorization = event.headers.Authorization
   const userId = parseUserId(jwtToken)
 
   const newTodo: CreateTodoRequest = JSON.parse(event.body)
+  
+
 
 
   // TODO: Implement creating a new TODO item
