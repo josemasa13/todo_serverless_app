@@ -7,6 +7,7 @@ const todosTable = process.env.TODOS_TABLE
 const indexName = process.env.INDEX_NAME
 
 import { parseUserId } from '../../auth/utils'
+import { getSingleTodo } from '../utils'
 
 export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
     const authorization = event.headers.Authorization
@@ -16,7 +17,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const todoId = event.pathParameters.todoId
     const parsedBody = JSON.parse(event.body)
 
-    const itemToUpdate = await getItemToUpdate(todoId)
+    const itemToUpdate = await getSingleTodo(docClient, todoId, todosTable, indexName)
 
     await docClient.update({
         TableName: todosTable,
@@ -44,18 +45,4 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         body: JSON.stringify({})
     }
 
-}
-
-
-async function getItemToUpdate(todoId: string){
-    const item = await docClient.query({
-        TableName: todosTable,
-        IndexName: indexName,
-        KeyConditionExpression: 'todoId = :todoId',
-        ExpressionAttributeValues: {
-            ':todoId': todoId
-        }
-    }).promise()
-
-    return item.Items[0]
 }

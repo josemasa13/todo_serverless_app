@@ -6,6 +6,8 @@ import * as AWS  from 'aws-sdk'
 const docClient = new AWS.DynamoDB.DocumentClient()
 const todosTable = process.env.TODOS_TABLE
 const indexName = process.env.INDEX_NAME
+import { getSingleTodo } from '../utils'
+
 
 import { parseUserId } from '../../auth/utils'
 
@@ -16,7 +18,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     const jwtToken = split[1]
     const userId = parseUserId(jwtToken)
 
-    const itemToDelete = await getItemToUpdate(todoId)
+    const itemToDelete = await getSingleTodo(docClient, todoId, todosTable, indexName)
 
     await docClient.delete({
         TableName: todosTable,
@@ -34,17 +36,4 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         },
         body: JSON.stringify({})
     }  
-}
-
-async function getItemToUpdate(todoId: string){
-    const item = await docClient.query({
-        TableName: todosTable,
-        IndexName: indexName,
-        KeyConditionExpression: 'todoId = :todoId',
-        ExpressionAttributeValues: {
-            ':todoId': todoId
-        }
-    }).promise()
-
-    return item.Items[0]
 }

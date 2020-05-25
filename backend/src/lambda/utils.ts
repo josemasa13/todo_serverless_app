@@ -14,3 +14,18 @@ export function getUserId(event: APIGatewayProxyEvent): string {
 
   return parseUserId(jwtToken)
 }
+
+
+
+export async function getSingleTodo(docClient: AWS.DynamoDB.DocumentClient,todoId: string, tableName: string, indexName: string ){
+  const item = await docClient.query({
+      TableName: tableName,
+      IndexName: indexName,
+      KeyConditionExpression: 'todoId = :todoId',
+      ExpressionAttributeValues: {
+          ':todoId': todoId
+      }
+  }).promise()
+
+  return item.Items[0]
+}
